@@ -3,35 +3,32 @@ import { useApp } from "@/contexts/Appcontext";
 import { useState } from "react";
 
 export function ChatInterface() {
-  const { state } = useApp();
-  const [messages, setMessages] = useState<Array<{ id: number; text: string; sender: 'user' | 'system' }>>([
-    { id: 1, text: 'Welcome to the SQL Chat interface! Ask questions about your data in natural language.', sender: 'system' }
-  ]);
+  const { state, addMessage } = useApp();
   const [inputText, setInputText] = useState('');
 
   const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
+  e.preventDefault();
+  if (!inputText.trim()) return;
 
-    const newMessage = {
-      id: messages.length + 1,
-      text: inputText,
-      sender: 'user' as const
-    };
-
-    setMessages(prev => [...prev, newMessage]);
-    setInputText('');
-
-    // Simulate a response after a brief delay
-    setTimeout(() => {
-      const response = {
-        id: messages.length + 2,
-        text: `I received your message: "${inputText}". This is a UI-only demo, so I can't actually process queries yet!`,
-        sender: 'system' as const
-      };
-      setMessages(prev => [...prev, response]);
-    }, 1000);
+  const userMessage = {
+    id: state.messages.length + 1,
+    text: inputText,
+    sender: 'user' as const
   };
+
+  addMessage(userMessage);
+  setInputText('');
+
+  setTimeout(() => {
+    const response = {
+      id: state.messages.length + 2,
+      text: `I received your message: "${inputText}". This is a UI-only demo, so I can't actually process queries yet!`,
+      sender: 'system' as const
+    };
+    addMessage(response);
+  }, 1000);
+};
+
 
   if (!state.schema) {
     return (
@@ -51,7 +48,7 @@ export function ChatInterface() {
       
       <div className="flex-1 bg-gray-50 rounded-md p-4 mb-4 min-h-[400px] max-h-[500px] overflow-y-auto">
         <div className="space-y-3">
-          {messages.map((message) => (
+          {state.messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}

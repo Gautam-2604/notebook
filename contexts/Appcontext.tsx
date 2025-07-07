@@ -12,8 +12,15 @@ interface ConnectionConfig {
   type: 'postgresql' | 'mysql';
 }
 
+interface Message {
+  id: number;
+  text: string;
+  sender: 'user' | 'system';
+}
+
 interface AppState {
   isConnected: boolean;
+  messages: Message[]
   connectionConfig: ConnectionConfig | null;
   isConnecting: boolean;
   error: string | null;
@@ -31,10 +38,19 @@ type AppAction =
   | { type: 'CLEAR_ERROR' }
   | { type: 'QUERY_START' }
   | { type: 'QUERY_SUCCESS'; payload: QueryResult }
-  | { type: 'QUERY_FAILURE'; payload: string };
+  | { type: 'QUERY_FAILURE'; payload: string }
+  | { type: 'ADD_MESSAGE'; payload: Message }
+  | { type: 'CLEAR_MESSAGES' };
 
 const initialState: AppState = {
   isConnected: false,
+  messages: [
+    {
+      id: 1,
+      text: 'Welcome to the SQL Chat interface! Ask questions about your data in natural language.',
+      sender: 'system'
+    }
+  ],
   connectionConfig: null,
   isConnecting: false,
   error: null,
@@ -86,6 +102,17 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, isQuerying: false, queryResults: action.payload };
     case 'QUERY_FAILURE':
       return { ...state, isQuerying: false, error: action.payload };
+
+      case 'ADD_MESSAGE':
+      return {
+        ...state,
+        messages: [...state.messages, action.payload]
+      };
+    case 'CLEAR_MESSAGES':
+      return {
+        ...state,
+        messages: []
+      };
     default:
       return state;
   }
@@ -101,6 +128,8 @@ interface AppContextType {
   getQueryType: (query: string) => string;
   isReadOnlyQuery: (query: string) => boolean;
   formatQuery: (query: string) => string;
+  addMessage: (message: Message) => void;
+  clearMessages: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -163,6 +192,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getQueryType = (query: string) => queryRunner.getQueryType(query);
   const isReadOnlyQuery = (query: string) => queryRunner.isReadOnlyQuery(query);
   const formatQuery = (query: string) => queryRunner.formatQuery(query);
+  const addMessage = (message: Message) => {
+  dispatch({ type: 'ADD_MESSAGE', payload: message });
+};
+
+const clearMessages = () => {
+  dispatch({ type: 'CLEAR_MESSAGES' });
+};
 
   const value: AppContextType = {
     state,
@@ -170,6 +206,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     connect,
     disconnect,
     clearError,
+    addMessage,
+    clearMessages,
     executeQuery,
     getQueryType,
     isReadOnlyQuery,
