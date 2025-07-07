@@ -1,7 +1,9 @@
 'use client'
 import { useApp } from "@/contexts/Appcontext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {toast} from 'sonner'
+
+const STORAGE_KEY = 'db_connection_config';
 
 export function ConnectionForm() {
   const { state, connect, clearError, disconnect } = useApp();
@@ -14,16 +16,60 @@ export function ConnectionForm() {
     password: ''
   });
 
+  // Load saved connection config on component mount
+  useEffect(() => {
+    const savedConfig = localStorage.getItem(STORAGE_KEY);
+    if (savedConfig) {
+      try {
+        const parsed = JSON.parse(savedConfig);
+        setFormData(prev => ({
+          ...prev,
+          ...parsed,
+          // Don't restore password for security
+          password: ''
+        }));
+      } catch (error) {
+        console.error('Error loading saved connection config:', error);
+        // Clear invalid data
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  const saveConnectionConfig = (config: typeof formData) => {
+    try {
+      // Save config without password for security
+      const configToSave = {
+        ...config,
+        password: '' // Don't save password
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
+    } catch (error) {
+      console.error('Error saving connection config:', error);
+    }
+  };
+
+  const clearSavedConfig = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Error clearing saved config:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.promise(
-        connect(formData),
-    {
+    
+    const connectPromise = connect(formData).then(() => {
+      // Save config to localStorage on successful connection
+      saveConnectionConfig(formData);
+    });
+
+    toast.promise(connectPromise, {
       loading: 'Connecting...',
       success: 'Connected successfully!',
       error: 'Connection failed. Please try again.',
-    }
-    )
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -32,6 +78,25 @@ export function ConnectionForm() {
       ...prev,
       [name]: name === 'port' ? parseInt(value) || 5432 : value
     }));
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    // Optionally clear saved config on disconnect
+    // clearSavedConfig();
+  };
+
+  const handleClearSavedConfig = () => {
+    clearSavedConfig();
+    setFormData({
+      type: 'postgresql',
+      host: 'localhost',
+      port: 5432,
+      database: '',
+      username: '',
+      password: ''
+    });
+    toast.success('Saved connection config cleared');
   };
 
   if (state.isConnected) {
@@ -49,12 +114,20 @@ export function ConnectionForm() {
             </div>
           </div>
         </div>
-        <button 
-          onClick={() => disconnect()}
-          className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-        >
-          Disconnect
-        </button>
+        <div className="flex gap-2 mt-4">
+          <button 
+            onClick={handleDisconnect}
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+          >
+            Disconnect
+          </button>
+          <button 
+            onClick={handleClearSavedConfig}
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+          >
+            Clear Saved Config
+          </button>
+        </div>
       </div>
     );
   }
@@ -188,9 +261,17 @@ export function ConnectionForm() {
           ) : (
             'Connect'
           )}
-          
         </button>
         
+        {localStorage.getItem(STORAGE_KEY) && (
+          <button 
+            type="button"
+            onClick={handleClearSavedConfig}
+            className="w-full bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors text-sm"
+          >
+            Clear Saved Configuration
+          </button>
+        )}
       </form>
     </div>
   );
