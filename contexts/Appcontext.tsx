@@ -60,7 +60,6 @@ const initialState: AppState = {
   isQuerying: false
 };
 
-// Reducer
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'CONNECT_START':

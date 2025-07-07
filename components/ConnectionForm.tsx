@@ -16,7 +16,6 @@ export function ConnectionForm() {
     password: ''
   });
 
-  // Load saved connection config on component mount
   useEffect(() => {
     const savedConfig = localStorage.getItem(STORAGE_KEY);
     if (savedConfig) {
@@ -25,12 +24,10 @@ export function ConnectionForm() {
         setFormData(prev => ({
           ...prev,
           ...parsed,
-          // Don't restore password for security
           password: ''
         }));
       } catch (error) {
         console.error('Error loading saved connection config:', error);
-        // Clear invalid data
         localStorage.removeItem(STORAGE_KEY);
       }
     }
@@ -38,7 +35,6 @@ export function ConnectionForm() {
 
   const saveConnectionConfig = (config: typeof formData) => {
     try {
-      // Save config without password for security
       const configToSave = {
         ...config,
         password: '' // Don't save password
@@ -61,7 +57,6 @@ export function ConnectionForm() {
     e.preventDefault();
     
     const connectPromise = connect(formData).then(() => {
-      // Save config to localStorage on successful connection
       saveConnectionConfig(formData);
     });
 
@@ -82,8 +77,7 @@ export function ConnectionForm() {
 
   const handleDisconnect = () => {
     disconnect();
-    // Optionally clear saved config on disconnect
-    // clearSavedConfig();
+    clearSavedConfig();
   };
 
   const handleClearSavedConfig = () => {
@@ -101,29 +95,29 @@ export function ConnectionForm() {
 
   if (state.isConnected) {
     return (
-      <div className="p-6 bg-white rounded-lg shadow-sm border">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Database Connection</h2>
+      <div className="p-4 sm:p-6 bg-white rounded-lg shadow-sm border max-w-4xl mx-auto">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Database Connection</h2>
         <div className="bg-green-50 border border-green-200 rounded-md p-4">
-          <div className="flex items-center">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-            <div>
+          <div className="flex items-start sm:items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 sm:mt-0 flex-shrink-0"></div>
+            <div className="min-w-0 flex-1">
               <p className="text-green-800 font-medium">Connected Successfully</p>
-              <p className="text-green-600 text-sm">
+              <p className="text-green-600 text-sm break-all">
                 {state.connectionConfig?.type}://{state.connectionConfig?.host}:{state.connectionConfig?.port}/{state.connectionConfig?.database}
               </p>
             </div>
           </div>
         </div>
-        <div className="flex gap-2 mt-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
           <button 
             onClick={handleDisconnect}
-            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base"
           >
             Disconnect
           </button>
           <button 
             onClick={handleClearSavedConfig}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors text-sm sm:text-base"
           >
             Clear Saved Config
           </button>
@@ -133,28 +127,30 @@ export function ConnectionForm() {
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm border">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Database Connection</h2>
+    <div className="p-4 sm:p-6 bg-white rounded-lg shadow-sm border max-w-4xl mx-auto">
+      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">Database Connection</h2>
       
       {state.error && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
-              <p className="text-red-800 font-medium">Connection Failed</p>
+        <div className="mb-4 sm:mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start min-w-0 flex-1">
+              <div className="w-2 h-2 bg-red-500 rounded-full mr-3 mt-2 flex-shrink-0"></div>
+              <div className="min-w-0">
+                <p className="text-red-800 font-medium">Connection Failed</p>
+                <p className="text-red-600 text-sm mt-1 break-words">{state.error}</p>
+              </div>
             </div>
             <button 
               onClick={clearError}
-              className="text-red-600 hover:text-red-700"
+              className="text-red-600 hover:text-red-700 ml-2 flex-shrink-0 p-1"
             >
               ✕
             </button>
           </div>
-          <p className="text-red-600 text-sm mt-2">{state.error}</p>
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Database Type
@@ -163,7 +159,7 @@ export function ConnectionForm() {
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-sm sm:text-base"
             disabled={state.isConnecting}
           >
             <option value="postgresql">PostgreSQL</option>
@@ -171,7 +167,7 @@ export function ConnectionForm() {
           </select>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Host
@@ -181,7 +177,7 @@ export function ConnectionForm() {
               name="host"
               value={formData.host}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-sm sm:text-base"
               disabled={state.isConnecting}
             />
           </div>
@@ -194,7 +190,7 @@ export function ConnectionForm() {
               name="port"
               value={formData.port}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-sm sm:text-base"
               disabled={state.isConnecting}
             />
           </div>
@@ -210,69 +206,84 @@ export function ConnectionForm() {
             value={formData.database}
             onChange={handleChange}
             placeholder="my_database"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-sm sm:text-base"
             disabled={state.isConnecting}
             required
           />
         </div>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Username *
-          </label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            placeholder="username"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-            disabled={state.isConnecting}
-            required
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Username *
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="username"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-sm sm:text-base"
+              disabled={state.isConnecting}
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password *
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="password"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-sm sm:text-base"
+              disabled={state.isConnecting}
+              required
+            />
+          </div>
         </div>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Password *
-          </label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="password"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-            disabled={state.isConnecting}
-            required
-          />
-        </div>
-        
-        <button 
-          type="submit"
-          disabled={state.isConnecting || !formData.database || !formData.username}
-          className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-        >
-          {state.isConnecting ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Connecting...
-            </>
-          ) : (
-            'Connect'
-          )}
-        </button>
-        
-        {localStorage.getItem(STORAGE_KEY) && (
+        <div className="space-y-3">
           <button 
-            type="button"
-            onClick={handleClearSavedConfig}
-            className="w-full bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors text-sm"
+            type="submit"
+            disabled={state.isConnecting || !formData.database || !formData.username}
+            className="w-full bg-blue-600 text-white px-4 py-2 sm:py-3 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm sm:text-base font-medium"
           >
-            Clear Saved Configuration
+            {state.isConnecting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Connecting...
+              </>
+            ) : (
+              'Connect to Database'
+            )}
           </button>
-        )}
+          
+          {localStorage.getItem(STORAGE_KEY) && (
+            <button 
+              type="button"
+              onClick={handleClearSavedConfig}
+              className="w-full bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors text-sm"
+            >
+              Clear Saved Configuration
+            </button>
+          )}
+        </div>
       </form>
+      
+      {/* Connection Tips */}
+      <div className="mt-6 sm:mt-8 p-4 bg-blue-50 border border-blue-200 rounded-md">
+        <h3 className="text-sm font-medium text-blue-800 mb-2">Connection Tips</h3>
+        <ul className="text-xs sm:text-sm text-blue-700 space-y-1">
+          <li>• Ensure your database server is running and accessible</li>
+          <li>• Check that the host and port are correct</li>
+          <li>• Verify your username and password are valid</li>
+          <li>• Make sure the database name exists</li>
+        </ul>
+      </div>
     </div>
   );
 }
