@@ -140,15 +140,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'CONNECT_START' });
     
     try {
+      // Simulate connection delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // Validate required fields
       if (!config.host || !config.database || !config.username) {
         throw new Error('Please fill in all required fields');
       }
       
-      if (Math.random() < 0.1) {
-        throw new Error('Connection timeout - please check your credentials');
-      }
+      // Removed the random failure condition - connection will now always succeed
+      // if validation passes
       
       dispatch({ 
         type: 'CONNECT_SUCCESS', 

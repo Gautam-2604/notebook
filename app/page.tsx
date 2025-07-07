@@ -1,8 +1,8 @@
 "use client";
-import { ChatInterface } from "@/components/ChatInterface";
-import { ConnectionForm } from "@/components/ConnectionForm";
-import { QueryResults } from "@/components/QueryResult";
-import { SchemaExplorer } from "@/components/SchemaExplorer";
+import { ChatInterface } from "@/components/chat/ChatWindow";
+import { ConnectionForm } from "@/components/connect/ConnectorForm";
+import { QueryResults } from "@/components/output/QueryOutput";
+import { SchemaExplorer } from "@/components/schema/SchemaExplorer";
 import { useApp } from "@/contexts/Appcontext";
 import { useState, useEffect } from "react";
 
@@ -16,26 +16,21 @@ const Page = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Enhanced responsive behavior
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       
-      // Close mobile menu when screen gets larger
       if (width >= 1024) {
         setMobileMenuOpen(false);
         setSidebarExpanded(true);
       }
-      // Auto-collapse sidebar on medium screens
       else if (width >= 768 && width < 1024) {
         setSidebarExpanded(false);
       }
-      // Keep sidebar collapsed on small screens
       else if (width < 768) {
         setSidebarExpanded(false);
       }
@@ -69,10 +64,6 @@ const Page = () => {
       requiresConnection: true,
     },
   ];
-
-  const toggleModal = () => {
-    setModalOpen(!modalOpen);
-  };
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
