@@ -1,58 +1,33 @@
-
-export type Column = {
-  name: string;
-  type: string;
+export const mockSchema = {
+  tables: [
+    {
+      name: 'users',
+      columns: [
+        { name: 'id', type: 'integer', primaryKey: true },
+        { name: 'name', type: 'varchar(100)' },
+        { name: 'email', type: 'varchar(255)' },
+        { name: 'created_at', type: 'timestamp' }
+      ]
+    },
+    {
+      name: 'orders',
+      columns: [
+        { name: 'id', type: 'integer', primaryKey: true },
+        { name: 'customer', type: 'varchar(100)' },
+        { name: 'total', type: 'decimal(10,2)' },
+        { name: 'status', type: 'varchar(50)' },
+        { name: 'created_at', type: 'timestamp' }
+      ]
+    },
+    {
+      name: 'products',
+      columns: [
+        { name: 'id', type: 'integer', primaryKey: true },
+        { name: 'name', type: 'varchar(200)' },
+        { name: 'price', type: 'decimal(10,2)' },
+        { name: 'category', type: 'varchar(100)' }
+      ]
+    }
+  ]
 };
 
-export type TableSchema = {
-  name: string;
-  columns: Column[];
-};
-
-export const mockSchema: TableSchema[] = [
-  {
-    name: "users",
-    columns: [
-      { name: "id", type: "INT" },
-      { name: "name", type: "VARCHAR" },
-      { name: "email", type: "VARCHAR" },
-      { name: "created_at", type: "TIMESTAMP" },
-    ],
-  },
-  {
-    name: "orders",
-    columns: [
-      { name: "id", type: "INT" },
-      { name: "user_id", type: "INT" },
-      { name: "total", type: "DECIMAL" },
-      { name: "status", type: "VARCHAR" },
-      { name: "created_at", type: "TIMESTAMP" },
-    ],
-  },
-  {
-    name: "products",
-    columns: [
-      { name: "id", type: "INT" },
-      { name: "name", type: "VARCHAR" },
-      { name: "price", type: "DECIMAL" },
-      { name: "in_stock", type: "BOOLEAN" },
-    ],
-  },
-  {
-    name: "categories",
-    columns: [
-      { name: "id", type: "INT" },
-      { name: "name", type: "VARCHAR" },
-    ],
-  },
-  {
-    name: "reviews",
-    columns: [
-      { name: "id", type: "INT" },
-      { name: "product_id", type: "INT" },
-      { name: "user_id", type: "INT" },
-      { name: "rating", type: "INT" },
-      { name: "comment", type: "TEXT" },
-    ],
-  },
-];
